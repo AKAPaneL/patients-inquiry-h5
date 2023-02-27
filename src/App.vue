@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import { Button as vantButton } from 'vant'
+import { ref } from 'vue'
+const data = ref({})
+console.log(data)
 </script>
 
 <template>
