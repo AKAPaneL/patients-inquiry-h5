@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import { Button as vantButton } from 'vant'
 import { useUserStroe } from './stores/user'
 import { request } from './utils/request'
 import type { User } from './types/user'
@@ -17,10 +16,10 @@ const login = async () => {
 </script>
 
 <template>
+  <RouterView />
   <span>用户名：{{ store.user?.account }}</span>
   <span>密码：{{ store.user?.mobile }}</span>
-  <vantButton type="primary" @click="login">登录</vantButton>
-  <RouterView />
+  <van-button type="primary" @click="login">登录</van-button>
 </template>
 
 <style scoped>
