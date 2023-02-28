@@ -1,13 +1,25 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import { Button as vantButton } from 'vant'
-import { ref } from 'vue'
-const data = ref({})
-console.log(data)
+import { useUserStroe } from './stores/user'
+import { request } from './utils/request'
+import type { User } from './types/user'
+
+const store = useUserStroe()
+
+const login = async () => {
+  const res = await request<User>('/login/password', 'post', {
+    mobile: '13211112222',
+    password: 'abc12345'
+  })
+  store.setUser(res.data)
+}
 </script>
 
 <template>
-  <vantButton type="primary">vant按钮</vantButton>
+  <span>用户名：{{ store.user?.account }}</span>
+  <span>密码：{{ store.user?.mobile }}</span>
+  <vantButton type="primary" @click="login">登录</vantButton>
   <RouterView />
 </template>
 
