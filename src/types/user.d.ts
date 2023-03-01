@@ -11,3 +11,10 @@ export type User = {
   avatar: string
   refreshToken: string
 }
+
+export type CodeType =
+  | 'login'
+  | 'register'
+  | 'changeMobile'
+  | 'forgetPassword'
+  | 'bindMobile'

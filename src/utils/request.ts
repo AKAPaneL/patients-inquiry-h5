@@ -3,6 +3,7 @@ import type { Method } from 'axios'
 import { useUserStroe } from '@/stores/user'
 import { showToast } from 'vant'
 import router from '@/router'
+import { useRoute } from 'vue-router'
 
 const baseURL = 'https://consult-api.itheima.net/'
 const instance = axios.create({
@@ -43,7 +44,12 @@ instance.interceptors.response.use(
     if (error.response.status === 401) {
       const store = useUserStroe()
       store.delUser()
-      router.push('/login')
+      router.push({
+        path: '/login',
+        query: {
+          returnUrl: useRoute().path
+        }
+      })
     }
     // 对响应错误做点什么
     return Promise.reject(error)
