@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import cpNavBar from '@/components/cp-nav-bar.vue'
+import cpIcon from '@/components/cp-icon.vue'
 import { mobileRules, passwordRules, codeRules } from '@/utils/rules'
 import { ref, onUnmounted } from 'vue'
 import { loginByPassword, sendMobileCode, loginByCode } from '@/services/user' //导入接口
@@ -86,10 +87,10 @@ onUnmounted(() => {
         :rules="passwordRules"
       >
         <template #button>
-          <van-icon
+          <cp-icon
             @click="show = !show"
-            :name="`/index/src/icons/login/eye-${show ? 'on' : 'off'}.svg`"
-          ></van-icon>
+            :name="`login-eye-${show ? 'on' : 'off'}`"
+          ></cp-icon>
         </template>
       </van-field>
       <van-field
