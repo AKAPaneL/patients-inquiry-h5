@@ -6,6 +6,7 @@ import router from './router'
 // 导入vant全局样式
 import 'vant/lib/index.css'
 import './styles/main.css'
+import 'virtual:svg-icons-register'
 
 const app = createApp(App)
 
