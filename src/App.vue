@@ -17,9 +17,6 @@ const login = async () => {
 
 <template>
   <RouterView />
-  <span>用户名：{{ store.user?.account }}</span>
-  <span>密码：{{ store.user?.mobile }}</span>
-  <van-button type="primary" @click="login">登录</van-button>
 </template>
 
 <style scoped>

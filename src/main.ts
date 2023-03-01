@@ -4,7 +4,7 @@ import pinia from './stores'
 import App from './App.vue'
 import router from './router'
 // 导入vant全局样式
-// import 'vant/lib/index.css'----已经使用组件
+import 'vant/lib/index.css'
 import './styles/main.css'
 
 const app = createApp(App)
