@@ -17,7 +17,7 @@ instance.interceptors.request.use(
     // 在发送请求之前做些什么
     const store = useUserStroe()
     if (store.user?.token && config.headers) {
-      config.headers.Authorization = `Bear ${store.user.token}`
+      config.headers.Authorization = `Bearer ${store.user.token}`
     }
     return config
   },
