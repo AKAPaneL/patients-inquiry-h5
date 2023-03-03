@@ -2,8 +2,12 @@
 import { ref } from 'vue'
 import type { UserInfo } from '@/types/user'
 import { getUserInfo } from '@/services/user'
-const user = ref<UserInfo>()
+import { useUserStroe } from '@/stores/user'
+import { showConfirmDialog } from 'vant'
+import router from '@/router'
 
+const user = ref<UserInfo>()
+//--获取用户信息--
 const onGetUserInfo = async () => {
   const res = await getUserInfo()
   user.value = res.data
@@ -19,6 +23,17 @@ const tools = ref([
   { label: '官方客服', path: '/' },
   { label: '设置', path: '/' }
 ])
+
+// 登出--
+const logout = async () => {
+  await showConfirmDialog({
+    title: '温馨提示',
+    message: '确认是否退出当前账号'
+  })
+  const store = useUserStroe()
+  store.delUser()
+  router.push('/login')
+}
 </script>
 
 <template>
@@ -100,7 +115,7 @@ const tools = ref([
       >
         <template #icon><cp-icon :name="`user-tool-0${i + 1}`" /></template>
       </van-cell>
-      <a class="logout" href="javascript:;">退出登录</a>
+      <a class="logout" href="javascript:;" @click="logout">退出登录</a>
     </div>
   </div>
 </template>

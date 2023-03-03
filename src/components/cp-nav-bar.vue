@@ -3,6 +3,9 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const onClickLeft = () => {
+  if (props.back) {
+    return props.back()
+  }
   // TODO 点击左侧返回按钮
   if (history.state?.back) {
     router.back()
@@ -10,9 +13,10 @@ const onClickLeft = () => {
     router.push('/')
   }
 }
-defineProps<{
+const props = defineProps<{
   title?: string
   rightText?: string
+  back?: () => void
 }>()
 const emit = defineEmits<{
   (e: 'rightClick'): void
