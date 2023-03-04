@@ -1,8 +1,22 @@
 <script setup lang="ts">
-import { getPatientList } from '@/services/user'
-import { ref } from 'vue'
+import {
+  getPatientList,
+  addPatient,
+  getPatientById,
+  editPatientPort,
+  deletPatient
+} from '@/services/user'
+import { ref, computed } from 'vue'
 import type { PatientList, Patient } from '@/types/user'
+import {
+  showSuccessToast,
+  showDialog,
+  showConfirmDialog,
+  type FormInstance
+} from 'vant'
+import { nameRules, idCardRules } from '@/utils/rules'
 import cpNavBar from '@/components/cp-nav-bar.vue'
+import cpIcon from '@/components/cp-icon.vue'
 import cpRadioBtn from '@/components/cp-radio-btn.vue'
 
 const patientList = ref<PatientList>([])
@@ -10,25 +24,99 @@ const options = ref([
   { label: '男', value: 1 },
   { label: '女', value: 0 }
 ])
-const gender = ref(1)
 //加载患者列表
 const loadPatientList = async () => {
   const res = await getPatientList()
   patientList.value = res.data
+  console.log(res)
 }
 loadPatientList()
 
-// --打开侧滑栏
-const show = ref(false)
-const showPopup = () => {
-  show.value = true
+const show = ref(false) //侧划栏显示数据
+
+//表单初始值：--
+const initPatient: Patient = {
+  name: '',
+  idCard: '',
+  gender: 1,
+  defaultFlag: 0
 }
+// 表单绑定数据：--
 const patientForm = ref<Patient>({
   name: '',
   idCard: '',
   defaultFlag: 0,
   gender: 1
 })
+// 打开表单函数--// --打开侧滑栏
+const showPopup = () => {
+  patientForm.value = { ...initPatient }
+  form.value?.resetValidation()
+  show.value = true
+}
+const form = ref<FormInstance>()
+// 计算属性：--
+const defaultFlag = computed({
+  get: () => (patientForm.value.defaultFlag ? true : false),
+  set: (newValue) => {
+    patientForm.value.defaultFlag = newValue ? 1 : 0
+  }
+})
+//添加患者函数
+let adding = false
+const savePatient = async () => {
+  //1.调用全局验证
+  // 判断身份证倒数第二位
+  await form.value?.validate()
+  const gender = +patientForm.value.idCard.slice(-2, -1) % 2
+  if (gender !== patientForm.value.gender) {
+    await showDialog({
+      title: '温馨提示',
+      message: '身份证上的性别信息与您填写不符合'
+    })
+    return
+  }
+  // 节流阀：
+  if (adding) return
+  adding = true
+
+  // 2.验证通过--调用接口添加
+  if (patientForm.value.id) {
+    await editPatientPort(patientForm.value)
+  } else {
+    await addPatient(patientForm.value)
+  }
+  // 3.成功添加弹出信息
+  showSuccessToast('添加成功')
+  // 4.关闭表单
+  show.value = false
+  // 5.刷新页面
+  await loadPatientList()
+  adding = false
+}
+// 点击编辑
+const editPatient = async (id: string) => {
+  showPopup()
+  const res = await getPatientById(id)
+  const { name, idCard, defaultFlag, gender } = res.data
+  patientForm.value = { name, idCard, defaultFlag, id, gender }
+  console.log(res)
+}
+// 删除患者
+const removePatient = async () => {
+  if (patientForm.value.id) {
+    await showConfirmDialog({
+      title: '温馨提示',
+      message: '该操作将永久删除个人信息。您确认吗'
+    })
+    await deletPatient(patientForm.value.id)
+    showSuccessToast('删除成功')
+    // 关闭表单
+    show.value = false
+    // 刷新页面
+    await loadPatientList()
+  }
+}
 </script>
 
 <template>
@@ -38,11 +126,15 @@ const patientForm = ref<Patient>({
       <div class="patient-item" v-for="item in patientList" :key="item.id">
         <div class="info">
           <span class="name">{{ item.name }}</span>
-          <span class="id">{{ item.idCard }}</span>
+          <span class="id">{{
+            item.idCard.replace(/^(.{6}).+(.{4})$/, '\$1********\$2')
+          }}</span>
           <span>{{ item.gender ? '男' : '女' }}</span>
           <span>{{ item.age }}岁</span>
         </div>
-        <div class="icon"><cp-icon name="user-edit" /></div>
+        <div class="icon" @click="editPatient(item.id as string)">
+          <cp-icon name="user-edit" />
+        </div>
         <div class="tag" v-if="item.defaultFlag === 1">默认</div>
       </div>
       <div
@@ -58,39 +150,44 @@ const patientForm = ref<Patient>({
     <!-- 侧边栏 -->
     <van-popup v-model:show="show" position="right">
       <cp-nav-bar
-        title="添加患者"
+        :title="patientForm.id ? '编辑患者' : '添加患者'"
         right-text="保存"
         :back="() => (show = false)"
+        @right-click="savePatient"
       ></cp-nav-bar>
-      <van-field
-        v-model="patientForm.name"
-        label="真实姓名"
-        placeholder="请输入真实姓名"
-      />
-      <van-field
-        v-model="patientForm.idCard"
-        label="身份证号"
-        placeholder="请输入身份证号"
-      />
-      <van-field label="性别" class="pb4">
-        <!-- 单选按钮组件 -->
-        <template #input>
-          <cp-radio-btn
-            v-model="patientForm.gender"
-            :options="options"
-          ></cp-radio-btn>
-        </template>
-      </van-field>
-      {{ patientForm.gender }}
-      <van-field label="默认就诊人">
-        <template #input>
-          <van-checkbox
-            v-model="patientForm.defaultFlag"
-            :icon-size="18"
-            round
-          />
-        </template>
-      </van-field>
+      <van-form ref="form">
+        <van-field
+          v-model="patientForm.name"
+          label="真实姓名"
+          placeholder="请输入真实姓名"
+          :rules="nameRules"
+        />
+        <van-field
+          v-model="patientForm.idCard"
+          label="身份证号"
+          placeholder="请输入身份证号"
+          :rules="idCardRules"
+        />
+        <van-field label="性别" class="pb4">
+          <!-- 单选按钮组件 -->
+          <template #input>
+            <cp-radio-btn
+              v-model="patientForm.gender"
+              :options="options"
+            ></cp-radio-btn>
+          </template>
+        </van-field>
+        <van-field label="默认就诊人">
+          <template #input>
+            <van-checkbox v-model="defaultFlag" :icon-size="18" round />
+          </template>
+        </van-field>
+      </van-form>
+      <van-action-bar>
+        <van-action-bar-button @click="removePatient"
+          >删除</van-action-bar-button
+        >
+      </van-action-bar>
     </van-popup>
   </div>
 </template>
@@ -182,5 +279,14 @@ const patientForm = ref<Patient>({
 }
 .pb4 {
   padding-bottom: 4px;
+}
+// 底部操作栏
+.van-action-bar {
+  padding: 0 10px;
+  margin-bottom: 10px;
+  .van-button {
+    color: var(--cp-price);
+    background-color: var(--cp-bg);
+  }
 }
 </style>
