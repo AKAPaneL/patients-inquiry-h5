@@ -5,3 +5,7 @@ import { request } from '@/utils/request'
 export function getKnowledgePage(data: KnowledgeParams) {
   return request<KnowledgePage>('/patient/home/knowledge', 'get', data)
 }
+// 获取关注的医生列表
+export function getLikeDoctor() {
+  return request('/page/doc')
+}
