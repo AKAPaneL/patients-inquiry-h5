@@ -4,7 +4,8 @@ import type {
   KnowledgePage,
   DoctorPage,
   PageParams,
-  FollowType
+  FollowType,
+  TopDep
 } from '@/types/consult'
 import { request } from '@/utils/request'
 // 获取百科文章列表
@@ -18,4 +19,8 @@ export function getDoctor(data: PageParams) {
 // 关注操作--关注或者取消
 export function followOrUnfollow(id: string, type: FollowType) {
   return request('/like', 'post', { id, type })
+}
+//找医生--查询所有科室-层级
+export function getAllDep() {
+  return request<TopDep[]>('/dep/all')
 }
