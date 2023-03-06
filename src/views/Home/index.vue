@@ -2,7 +2,7 @@
 import KnowledgeList from '@/components/knowledge-list.vue'
 import FollowDoctor from '@/components/follow-doctor.vue'
 import { ref } from 'vue'
-const active = ref(1)
+const active = ref(0)
 </script>
 
 <template>

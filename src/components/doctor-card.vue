@@ -1,14 +1,28 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import type { Doctor } from '@/types/consult'
+import { useFollow } from '@/composable/index'
+
+const props = defineProps<{
+  item: Doctor
+}>()
+// 使用自封装的逻辑
+const { loading, follow } = useFollow()
+</script>
 <template>
   <div class="doctor-card">
-    <van-image
+    <van-image round :src="item.avatar" />
+    <p class="name">{{ item.name }}</p>
+    <p class="van-ellipsis">{{ item.hospitalName }} {{ item.depName }}</p>
+    <p>{{ item.positionalTitles }}</p>
+    <van-button
       round
-      src="https://yanxuan-item.nosdn.127.net/3cb61b3fd4761555e56c4a5f19d1b4b1.png"
-    />
-    <p class="name">周医生</p>
-    <p class="van-ellipsis">积水潭医院 神经内科</p>
-    <p>副主任医师</p>
-    <van-button round size="small" type="primary">+ 关注</van-button>
+      size="small"
+      type="primary"
+      :loading="loading"
+      @click="follow(item)"
+    >
+      {{ item.likeFlag === 1 ? '已关注' : '+ 关注' }}
+    </van-button>
   </div>
 </template>
 <style scoped lang="scss">
@@ -20,7 +34,7 @@
   box-shadow: 0px 0px 11px 0px rgba(229, 229, 229, 0.2);
   text-align: center;
   padding: 15px;
-  margin-left: 15px;
+  margin-left: 10px;
   display: inline-block;
   box-sizing: border-box;
   > .van-image {
