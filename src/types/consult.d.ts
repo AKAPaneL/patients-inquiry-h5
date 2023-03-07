@@ -146,3 +146,27 @@ export type ConsultIllness = Pick<
   PartialConsult,
   'illnessDesc' | 'illnessTime' | 'consultFlag' | 'pictures'
 >
+
+// 上传图片返回的data类型
+export type Image = {
+  // 图片id
+  id: string
+  // 图片路径
+  url: string
+}
+// 问诊订单预支付传参
+export type ConsultOrderPreParams = Pick<PartialConsult, 'type' | 'illnessType'>
+
+// 问诊订单预支付信息
+export type ConsultOrderPreData = {
+  /** 积分抵扣 */
+  pointDeduction: number
+  /** 优惠券抵扣 */
+  couponDeduction: number
+  /** 优惠券ID */
+  couponId: string
+  /** 需付款 */
+  payment: number
+  /** 实付款 */
+  actualPayment: number
+}

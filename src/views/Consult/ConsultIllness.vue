@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import type { ConsultIllness } from '@/types/consult'
+import { showConfirmDialog, type UploaderFileListItem } from 'vant'
 import cpRadioBtn from '@/components/cp-radio-btn.vue'
-import { ref } from 'vue'
+import { uploadImage } from '@/services/consult'
+import { ref, computed, onMounted } from 'vue'
 import { IllnessTime } from '@/enums'
+import { useConsultStore } from '@/stores/modules/consult'
+import { useRouter } from 'vue-router'
 
 const timeOptions = [
   { label: '一周内', value: IllnessTime.Week },
@@ -19,6 +23,55 @@ const form = ref<ConsultIllness>({
   illnessTime: undefined,
   consultFlag: undefined,
   pictures: []
+})
+
+const fileList = ref<any[]>([])
+const onAfterRead = (item: UploaderFileListItem) => {
+  if (!item.file) return
+  item.status = 'uploading'
+  item.message = '上传中...'
+  uploadImage(item.file)
+    .then((res) => {
+      item.status = 'done'
+      item.message = ''
+      item.url = res.data.url
+      form.value.pictures?.push(res.data)
+    })
+    .catch(() => {
+      item.status = 'failed'
+      item.message = '上传失败'
+    })
+  console.log(form.value)
+  return undefined
+}
+const onDeleteImg = (item: UploaderFileListItem) => {
+  // 删除图片
+  form.value.pictures = form.value.pictures?.filter((v) => v.url !== item.url)
+}
+const disabled = computed(() => {
+  return (
+    !form.value.illnessDesc ||
+    form.value.illnessTime === undefined ||
+    form.value.consultFlag === undefined
+  )
+})
+const store = useConsultStore()
+const router = useRouter()
+const next = () => {
+  if (disabled.value) return
+  store.setIllness(form.value)
+  router.push('/user/patient?isChange=1')
+}
+onMounted(async () => {
+  if (store.consult.illnessDesc) {
+    await showConfirmDialog({
+      title: '温馨提示',
+      message: '是否恢复您之前填写的病情信息呢？'
+    })
+    const { illnessDesc, illnessTime, consultFlag, pictures } = store.consult
+    form.value = { illnessDesc, illnessTime, consultFlag, pictures }
+    fileList.value = pictures || []
+  }
 })
 </script>
 
@@ -60,7 +113,23 @@ const form = ref<ConsultIllness>({
           v-model="form.consultFlag"
         ></cpRadioBtn>
       </div>
+      <div class="illness-img">
+        <van-uploader
+          :max-count="5"
+          multiple
+          upload-icon="photo-o"
+          upload-text="上传图片"
+          :max-size="5 * 1024 * 1024"
+          v-model="fileList"
+          :after-read="onAfterRead"
+          @delete="onDeleteImg"
+        ></van-uploader>
+        <p class="tip">上传内容仅医生可见,最多9张图,最大5MB</p>
+      </div>
     </div>
+    <van-button :class="{ disabled }" @click="next" type="primary" block round
+      >下一步</van-button
+    >
   </div>
 </template>
 
@@ -117,6 +186,53 @@ const form = ref<ConsultIllness>({
       color: var(--cp-text3);
       padding: 15px 0;
     }
+  }
+}
+.illness-img {
+  padding-top: 16px;
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  .tip {
+    font-size: 12px;
+    color: var(--cp-tip);
+  }
+  ::v-deep() {
+    .van-uploader {
+      &__preview {
+        &-delete {
+          left: -6px;
+          top: -6px;
+          border-radius: 50%;
+          background-color: var(--cp-primary);
+          width: 20px;
+          height: 20px;
+          &-icon {
+            transform: scale(0.9) translate(-22%, 22%);
+          }
+        }
+        &-image {
+          border-radius: 8px;
+          overflow: hidden;
+        }
+      }
+      &__upload {
+        border-radius: 8px;
+      }
+      &__upload-icon {
+        color: var(--cp-text3);
+      }
+    }
+  }
+}
+.van-button {
+  font-size: 16px;
+  margin-bottom: 30px;
+  &.disabled {
+    opacity: 1;
+    background: #fafafa;
+    color: #d9dbde;
+    border: #fafafa;
   }
 }
 </style>
