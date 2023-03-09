@@ -45,3 +45,12 @@ export function getConsultOrderPre(data: ConsultOrderPreParams) {
 export function createConsultOrder(data: PartialConsult) {
   return request<{ id: string }>('/patient/consult/order', 'post', data)
 }
+
+//支付接口
+export function getConsultOrderPayUrl(data: {
+  paymentMethod: 0 | 1
+  orderId: string
+  payCallback: string
+}) {
+  return request<{ payUrl: 'string' }>('/patient/consult/pay', 'post', data)
+}

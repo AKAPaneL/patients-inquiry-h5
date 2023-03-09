@@ -1,11 +1,20 @@
 <script setup lang="ts">
 import cpNavBar from '@/components/cp-nav-bar.vue'
-import { showConfirmDialog, showFailToast, showLoadingToast } from 'vant'
+import {
+  showConfirmDialog,
+  showFailToast,
+  showLoadingToast,
+  showToast
+} from 'vant'
 import { ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 import { useConsultStore } from '@/stores/modules/consult'
 // 导入接口
-import { getConsultOrderPre, createConsultOrder } from '@/services/consult'
+import {
+  getConsultOrderPre,
+  createConsultOrder,
+  getConsultOrderPayUrl
+} from '@/services/consult'
 import { getPatientById } from '@/services/user'
 // 导入类型
 import type { ConsultOrderPreData } from '@/types/consult'
@@ -53,9 +62,14 @@ const submit = async () => {
   show.value = true
 }
 const router = useRouter()
+
+onBeforeRouteLeave(() => {
+  if (orderId.value) return false
+})
+
 const onClose = () => {
   return showConfirmDialog({
-    title: '关闭支付',
+    title: '取消支付',
     message: '取消支付将无法获得医生回复，医生接诊名额有限，是否确认关闭？',
     cancelButtonText: '仍要关闭',
     confirmButtonText: '继续支付'
@@ -66,9 +80,23 @@ const onClose = () => {
     })
     .catch(() => {
       orderId.value = ''
-      router.push('/user/consult')
+      router.push('/user')
       return true
     })
+}
+const pay = async () => {
+  if (paymentMethod.value === undefined) return showToast('请选择支付方式')
+  showLoadingToast({
+    message: '加载中...',
+    forbidClick: true,
+    duration: 0
+  })
+  const res = await getConsultOrderPayUrl({
+    paymentMethod: paymentMethod.value,
+    orderId: orderId.value,
+    payCallback: 'http://127.0.0.1:5173/index/room'
+  })
+  window.location.href = res.data.payUrl
 }
 </script>
 
@@ -117,7 +145,7 @@ const onClose = () => {
       v-model:show="show"
       title="选择支付方式"
       :before-close="onClose"
-      @close="onClose"
+      :closeable="false"
     >
       <div class="pay-type">
         <p class="amount">￥{{ payInfo?.actualPayment }}</p>
@@ -136,7 +164,9 @@ const onClose = () => {
           </van-cell>
         </van-cell-group>
         <div class="btn">
-          <van-button type="primary" round block>立即支付</van-button>
+          <van-button type="primary" round block @click="pay"
+            >立即支付</van-button
+          >
         </div>
       </div>
     </van-action-sheet>

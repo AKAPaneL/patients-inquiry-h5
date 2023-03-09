@@ -1,5 +1,7 @@
 import { useUserStroe } from '@/stores/user'
 import { createRouter, createWebHistory } from 'vue-router'
+import { useConsultStore } from '@/stores/modules/consult'
+import { showDialog } from 'vant'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
@@ -59,7 +61,40 @@ const router = createRouter({
     {
       path: '/consult/pay',
       component: () => import('@/views/Consult/ConsultPay.vue'),
-      meta: { title: '问诊支付' }
+      meta: { title: '问诊支付' },
+      async beforeEnter(to, from, next) {
+        const store = useConsultStore()
+        const validKeys = [
+          'type',
+          'illnessType',
+          'depId',
+          'illnessDesc',
+          'illnessTime',
+          'consultFlag',
+          'patientId'
+        ]
+        const valid = validKeys.every((key) => store.consult[key] !== undefined)
+        if (!valid) {
+          return showDialog({
+            title: '温馨提示',
+            message:
+              '问诊信息不完整请重新填写，如有未支付的问诊订单可在问诊记录中继续支付！',
+            closeOnPopstate: false
+          }).then(() => {
+            next('/')
+          })
+        } else {
+          next()
+        }
+      }
+    },
+    {
+      path: '/room',
+      component: () => import('@/views/Room/index.vue'),
+      meta: { title: '问诊室' },
+      beforeEnter(to, from) {
+        if (!to.query.payResult === false) return '/user'
+      }
     }
   ]
 })

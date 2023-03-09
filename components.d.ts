@@ -16,6 +16,8 @@ declare module '@vue/runtime-core' {
     FollowDoctor: typeof import('./src/components/follow-doctor.vue')['default']
     KnowledgeList: typeof import('./src/components/knowledge-list.vue')['default']
     KonwledgeCard: typeof import('./src/components/konwledge-card.vue')['default']
+    RoomActions: typeof import('./src/components/room-actions.vue')['default']
+    RoomStatus: typeof import('./src/components/room-status.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     VanActionBar: typeof import('vant/es')['ActionBar']
