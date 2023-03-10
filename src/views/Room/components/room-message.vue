@@ -8,6 +8,7 @@ import {
   getPrescriptionPic
 } from '@/services/consult'
 import { showImagePreview, showLoadingToast, showToast } from 'vant'
+import EvaluateCard from './evaluate-card.vue'
 import { onMounted } from 'vue'
 import { useUserStroe } from '@/stores/user'
 import { useRouter } from 'vue-router'
@@ -198,8 +199,16 @@ onMounted(() => {
         </div>
       </div>
     </div>
+    <!-- 评价卡片，后期实现 -->
+    <div
+      class="msg msg-comment"
+      v-if="
+        item.msgType === MsgType.CardEva || item.msgType === MsgType.CardEvaForm
+      "
+    >
+      <evaluate-card :evaluate-doc="item.msg.evaluateDoc" />
+    </div>
   </template>
-  <!-- 评价卡片，后期实现 -->
 </template>
 
 <style lang="scss" scoped>

@@ -7,7 +7,7 @@ import RoomStatus from '@/views/Room/components/room-status.vue'
 import roomAction from './components/room-action.vue'
 import roomMessage from './components/room-message.vue'
 import { getConsultOrderDetail } from '@/services/consult'
-import { onUnmounted, ref, nextTick } from 'vue'
+import { onUnmounted, ref, nextTick, provide } from 'vue'
 import { useUserStroe } from '@/stores/user'
 import { useRoute } from 'vue-router'
 import type { Socket } from 'socket.io-client'
@@ -135,6 +135,17 @@ const onRefresh = () => {
     route.query.orderId
   )
 }
+// 修改评价卡片的方法
+const completeEva = (score: number) => {
+  const item = list.value.find((item) => item.msgType === MsgType.CardEvaForm)
+  if (item) {
+    item.msg.evaluateDoc = { score }
+    item.msgType = MsgType.CardEva
+  }
+}
+// 把方法传给后代
+provide('completeEva', completeEva)
+provide('consult', consult)
 </script>
 
 <template>

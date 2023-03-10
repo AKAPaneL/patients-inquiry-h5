@@ -80,3 +80,13 @@ export function getConsultOrderDetail(orderId: string) {
 export function getPrescriptionPic(id: string) {
   return request<{ url: string }>(`/patient/consult/prescription/${id}`, 'get')
 }
+// 评价医生
+export function evaluateConsultOrder(data: {
+  docId: string
+  orderId: string
+  score: number
+  content: string
+  anonymousFlag: 0 | 1
+}) {
+  return request<{ id: string }>('/patient/order/evaluate', 'post', data)
+}

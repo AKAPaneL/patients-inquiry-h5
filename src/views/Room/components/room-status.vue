@@ -1,11 +1,5 @@
 <script setup lang="ts">
 import { OrderType } from '@/enums/index'
-import { useRoute } from 'vue-router'
-import { ref } from 'vue'
-import { useUserStroe } from '@/stores/user'
-
-const route = useRoute()
-const store = useUserStroe()
 
 defineProps<{
   status?: OrderType
