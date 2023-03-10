@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { IllnessTime, MsgType } from '@/enums'
-import type { Message } from '@/types/room'
+import { IllnessTime, MsgType, PrescriptionStatus } from '@/enums'
+import type { Message, Prescription } from '@/types/room'
 import type { Image } from '@/types/consult'
 import {
   timeOptions,
   flagOptions,
   getPrescriptionPic
 } from '@/services/consult'
-import { showImagePreview, showLoadingToast } from 'vant'
+import { showImagePreview, showLoadingToast, showToast } from 'vant'
 import { onMounted } from 'vue'
 import { useUserStroe } from '@/stores/user'
-
+import { useRouter } from 'vue-router'
+const router = useRouter()
 const props = defineProps<{
   list: Message[]
   docAvator?: string
@@ -45,6 +46,17 @@ const showPrescription = async (id?: string) => {
     showImagePreview([res.data.url])
   }
 }
+// 购买药品
+const buy = (pre?: Prescription) => {
+  if (!pre) return
+  if (pre.status === PrescriptionStatus.Invalid) return showToast('处方已失效')
+  if (pre.status === PrescriptionStatus.NotPayment && !pre.orderId) {
+    return router.push(`/order/pay?id=${pre.id}`)
+  } else {
+    router.push(`/order/${pre.orderId}`)
+  }
+}
+
 onMounted(() => {
   console.log(props.list)
 })
@@ -181,7 +193,9 @@ onMounted(() => {
             <div class="num">x{{ i.quantity }}</div>
           </div>
         </div>
-        <div class="foot"><span>购买药品</span></div>
+        <div class="foot" @click="buy(item.msg.prescription)">
+          <span>购买药品</span>
+        </div>
       </div>
     </div>
   </template>
