@@ -9,8 +9,10 @@ import type {
   Image,
   PartialConsult,
   ConsultOrderPreData,
-  ConsultOrderPreParams
+  ConsultOrderPreParams,
+  ConsultOrderItem
 } from '@/types/consult'
+import { IllnessTime } from '@/enums'
 
 import { request } from '@/utils/request'
 // 获取百科文章列表
@@ -53,4 +55,28 @@ export function getConsultOrderPayUrl(data: {
   payCallback: string
 }) {
   return request<{ payUrl: 'string' }>('/patient/consult/pay', 'post', data)
+}
+
+// 枚举类型
+export const timeOptions = [
+  { label: '一周内', value: IllnessTime.Week },
+  { label: '一月内', value: IllnessTime.Month },
+  { label: '半年内', value: IllnessTime.HalfYear },
+  { label: '大于半年', value: IllnessTime.More }
+]
+export const flagOptions = [
+  { label: '就诊过', value: 0 },
+  { label: '没就诊过', value: 1 }
+]
+
+// 根据订单id:orderId查询对应订单详情和状态
+export function getConsultOrderDetail(orderId: string) {
+  return request<ConsultOrderItem>('/patient/consult/order/detail', 'get', {
+    orderId
+  })
+}
+
+// 根据处方ID查询处方单
+export function getPrescriptionPic(id: string) {
+  return request<{ url: string }>(`/patient/consult/prescription/${id}`, 'get')
 }

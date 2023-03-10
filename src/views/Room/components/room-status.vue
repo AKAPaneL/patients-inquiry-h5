@@ -1,13 +1,30 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { OrderType } from '@/enums/index'
+import { useRoute } from 'vue-router'
+import { ref } from 'vue'
+import { useUserStroe } from '@/stores/user'
+
+const route = useRoute()
+const store = useUserStroe()
+
+defineProps<{
+  status?: OrderType
+  countdown?: number
+}>()
+</script>
 
 <template>
   <div class="room-status">
-    <div class="wait">已通知医生尽快接诊，24小时内医生未回复将自动退款</div>
-    <!-- <div class="chat">
+    <div class="wait" v-if="status === OrderType.ConsultWait">
+      已通知医生尽快接诊，24小时内医生未回复将自动退款
+    </div>
+    <div class="chat" v-else-if="status === OrderType.ConsultChat">
       <span>咨询中</span>
-      <span>剩余时间：23:10:34</span>
-    </div> -->
-    <!-- <div class="end"><van-icon name="passed" /> 已结束</div> -->
+      <span
+        >剩余时间：<van-count-down :time="countdown ? countdown * 1000 : 0"
+      /></span>
+    </div>
+    <div class="end" v-else><van-icon name="passed" /> 已结束</div>
   </div>
 </template>
 

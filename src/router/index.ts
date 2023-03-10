@@ -92,8 +92,8 @@ const router = createRouter({
       path: '/room',
       component: () => import('@/views/Room/index.vue'),
       meta: { title: '问诊室' },
-      beforeEnter(to, from) {
-        if (!to.query.payResult === false) return '/user'
+      beforeEnter(to) {
+        if (to.query.payResult === 'false') return '/user'
       }
     }
   ]
