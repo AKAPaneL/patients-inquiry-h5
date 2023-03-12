@@ -10,7 +10,9 @@ import type {
   PartialConsult,
   ConsultOrderPreData,
   ConsultOrderPreParams,
-  ConsultOrderItem
+  ConsultOrderItem,
+  ConsultOrderListParams,
+  ConsultOrderPage
 } from '@/types/consult'
 import { IllnessTime } from '@/enums'
 
@@ -89,4 +91,17 @@ export function evaluateConsultOrder(data: {
   anonymousFlag: 0 | 1
 }) {
   return request<{ id: string }>('/patient/order/evaluate', 'post', data)
+}
+// 查询问诊记录
+export function getConsultOrderList(params: ConsultOrderListParams) {
+  return request<ConsultOrderPage>('/patient/consult/order/list', 'get', params)
+}
+
+// 取消订单
+export function cancelOrder(id: string) {
+  return request(`/patient/order/cancel/${id}`, 'put')
+}
+// 删除订单
+export function deleteOrder(id: string) {
+  return request<{ id: string }>(`/patient/order/${id}`, 'DELETE')
 }

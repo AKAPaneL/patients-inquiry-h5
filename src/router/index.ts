@@ -95,6 +95,11 @@ const router = createRouter({
       beforeEnter(to) {
         if (to.query.payResult === 'false') return '/user'
       }
+    },
+    {
+      path: '/user/consult',
+      component: import('@/views/User/ConsultPage.vue'),
+      meta: { title: '问诊记录' }
     }
   ]
 })

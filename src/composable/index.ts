@@ -1,6 +1,8 @@
 import { ref } from 'vue'
-import { followOrUnfollow } from '@/services/consult'
+import { followOrUnfollow, getPrescriptionPic } from '@/services/consult'
 import type { FollowType } from '@/types/consult'
+import { showImagePreview, showLoadingToast } from 'vant'
+
 export const useFollow = (type: FollowType = 'doc') => {
   const loading = ref(false)
   const follow = async (item: { id: string; likeFlag: 0 | 1 }) => {
@@ -18,4 +20,21 @@ export const useFollow = (type: FollowType = 'doc') => {
     loading,
     follow
   }
+}
+
+// 显示处方单
+export const useShowPrescription = () => {
+  const showPrescription = async (id?: string) => {
+    if (id) {
+      const toast = showLoadingToast({
+        duration: 0,
+        forbidClick: true,
+        message: '加载中...'
+      })
+      const res = await getPrescriptionPic(id)
+      toast.close()
+      showImagePreview([res.data.url])
+    }
+  }
+  return { showPrescription }
 }
