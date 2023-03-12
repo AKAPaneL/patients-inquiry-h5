@@ -54,7 +54,13 @@ const deleteConsultOrder = () => {
     })
 }
 const { showPrescription } = useShowPrescription()
-const onSelect = (action: PopoverAction) => {}
+const onSelect = (action: PopoverAction, i: number) => {
+  if (i === 0) {
+    showPrescription(props.data.prescriptionId)
+  } else if (i === 1) {
+    emit('delete', props.data.id)
+  }
+}
 </script>
 
 <template>
