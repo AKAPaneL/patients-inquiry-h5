@@ -165,7 +165,7 @@ const onSelect = (action: PopoverAction, i: number) => {
         plain
         size="small"
         round
-        :to="`/room?orderId=${data.id}`"
+        :to="`/user/consult/${data.id}`"
       >
         问诊记录
       </van-button>

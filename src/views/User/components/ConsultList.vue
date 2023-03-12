@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ConsultType } from '@/enums'
-import type { ConsultOrderItem, ConsultOrderListParams } from '@/types/consult'
+import type { ConsultOrderItem } from '@/types/consult'
 import { OrderType } from '@/enums'
 import { getConsultOrderList } from '@/services/consult'
 import ConsultItem from './ConsultItem.vue'
