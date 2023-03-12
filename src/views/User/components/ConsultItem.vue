@@ -6,7 +6,8 @@ import type { PopoverAction } from 'vant'
 import { cancelOrder, deleteOrder } from '@/services/consult'
 import { showSuccessToast, showFailToast, showLoadingToast } from 'vant'
 import { useShowPrescription } from '@/composable/index'
-
+import { useRouter } from 'vue-router'
+const router = useRouter()
 const props = defineProps<{
   data: ConsultOrderItem
 }>()
@@ -65,7 +66,10 @@ const onSelect = (action: PopoverAction, i: number) => {
 
 <template>
   <div class="consult-item">
-    <div class="head van-hairline--bottom">
+    <div
+      class="head van-hairline--bottom"
+      @click="router.push(`/user/consult/${data.id}`)"
+    >
       <img class="img" src="@/assets/avatar-doctor.svg" />
       <p>{{ data.docInfo?.name || '暂未分配医生' }}</p>
       <span
@@ -76,7 +80,7 @@ const onSelect = (action: PopoverAction, i: number) => {
         >{{ data.statusValue }}</span
       >
     </div>
-    <div class="body">
+    <div class="body" @click="router.push(`/user/consult/${data.id}`)">
       <div class="body-row">
         <div class="body-label">病情描述</div>
         <div class="body-value">{{ data.illnessDesc }}</div>

@@ -9,6 +9,7 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    CpConsultMore: typeof import('./src/components/cp-consult-more.vue')['default']
     CpIcon: typeof import('./src/components/cp-icon.vue')['default']
     CpNavBar: typeof import('./src/components/cp-nav-bar.vue')['default']
     CpRadioBtn: typeof import('./src/components/cp-radio-btn.vue')['default']
@@ -45,6 +46,7 @@ declare module '@vue/runtime-core' {
     VanRow: typeof import('vant/es')['Row']
     VanSidebar: typeof import('vant/es')['Sidebar']
     VanSidebarItem: typeof import('vant/es')['SidebarItem']
+    VanSkeleton: typeof import('vant/es')['Skeleton']
     VanSubmitBar: typeof import('vant/es')['SubmitBar']
     VanSwipe: typeof import('vant/es')['Swipe']
     VanSwipeItem: typeof import('vant/es')['SwipeItem']
