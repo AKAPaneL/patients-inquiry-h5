@@ -3,12 +3,22 @@ import { OrderType } from '@/enums'
 import { getConsultOrderDetail } from '@/services/consult'
 import type { ConsultOrderItem } from '@/types/consult'
 import CpConsultMore from '@/components/cp-consult-more.vue'
-import { showSuccessToast, showFailToast, showLoadingToast } from 'vant'
-import { cancelOrder, deleteOrder } from '@/services/consult'
+import {
+  showSuccessToast,
+  showFailToast,
+  showLoadingToast,
+  showToast
+} from 'vant'
+import {
+  cancelOrder,
+  deleteOrder,
+  getConsultOrderPayUrl
+} from '@/services/consult'
 import { getConsultFlagText, getIllnessTimeText } from '@/utils/filter'
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useShowPrescription } from '@/composable'
+import { useClipboard } from '@vueuse/core'
 const route = useRoute()
 const router = useRouter()
 const { showPrescription } = useShowPrescription()
@@ -16,6 +26,7 @@ const item = ref<ConsultOrderItem>()
 onMounted(async () => {
   const res = await getConsultOrderDetail(route.params.id as string)
   item.value = res.data
+  console.log(res.data)
 })
 // 取消订单
 const canceConsultlOrder = (item?: ConsultOrderItem) => {
@@ -52,9 +63,38 @@ const deleteConsultOrder = (item?: ConsultOrderItem) => {
       showFailToast('删除失败')
     })
 }
+const { copy, isSupported } = useClipboard()
+// 复制
+const onCopy = async () => {
+  if (!isSupported) return showFailToast('未授权，不可使用')
+  if (!item.value) return
+  await copy(item.value?.orderNo)
+  showSuccessToast('已复制到剪切板')
+}
+const show = ref(false)
+const paymentMethod = ref<0 | 1>()
+// 调用支付
+const pay = async () => {
+  if (paymentMethod.value === undefined) return showToast('请选择支付方式')
+  showLoadingToast({
+    message: '加载中...',
+    forbidClick: true,
+    duration: 0
+  })
+  const res = await getConsultOrderPayUrl({
+    paymentMethod: paymentMethod.value,
+    orderId: item.value?.id as string,
+    payCallback: 'http://127.0.0.1:5173/index/room'
+  })
+  window.location.href = res.data.payUrl
+}
+const onClose = () => {
+  show.value = false
+}
 </script>
 
 <template>
+  <!-- 骨架屏幕 -->
   <div class="consult-detail-page" v-if="!item">
     <cp-nav-bar title="问诊详情" />
     <van-skeleton title :row="4" style="margin-top: 30px" />
@@ -111,8 +151,8 @@ const deleteConsultOrder = (item?: ConsultOrderItem) => {
       <van-cell-group :border="false">
         <van-cell title="订单编号">
           <template #value>
-            <span class="copy">复制</span>
-            202201127465
+            <span class="copy" @click="onCopy">复制</span>
+            {{ item.orderNo }}
           </template>
         </van-cell>
         <van-cell title="创建时间" :value="item.createTime" />
@@ -137,7 +177,9 @@ const deleteConsultOrder = (item?: ConsultOrderItem) => {
       <van-button type="default" round @click="canceConsultlOrder(item)"
         >取消问诊</van-button
       >
-      <van-button type="primary" round>继续支付</van-button>
+      <van-button type="primary" round @click="show = true"
+        >继续支付</van-button
+      >
     </div>
     <div
       class="detail-action van-hairline--top"
@@ -192,6 +234,36 @@ const deleteConsultOrder = (item?: ConsultOrderItem) => {
       <van-button type="primary" round to="/">咨询其他医生</van-button>
     </div>
   </div>
+  <!-- 支付 -->
+  <van-action-sheet
+    v-model:show="show"
+    title="选择支付方式"
+    :before-close="onClose"
+    :closeable="true"
+  >
+    <div class="pay-type">
+      <p class="amount">￥{{ item?.payment }}</p>
+      <van-cell-group>
+        <van-cell title="微信支付" @click="paymentMethod = 0">
+          <template #icon><cp-icon name="consult-wechat" /></template>
+          <template #extra
+            ><van-checkbox :checked="paymentMethod === 0"
+          /></template>
+        </van-cell>
+        <van-cell title="支付宝支付" @click="paymentMethod = 1">
+          <template #icon><cp-icon name="consult-alipay" /></template>
+          <template #extra
+            ><van-checkbox :checked="paymentMethod === 1"
+          /></template>
+        </van-cell>
+      </van-cell-group>
+      <div class="btn">
+        <van-button type="primary" round block @click="pay"
+          >立即支付</van-button
+        >
+      </div>
+    </div>
+  </van-action-sheet>
 </template>
 
 <style lang="scss" scoped>
@@ -336,7 +408,7 @@ const deleteConsultOrder = (item?: ConsultOrderItem) => {
 }
 .detail-time {
   position: fixed;
-  z-index: 9999;
+  z-index: 10;
   left: 0;
   bottom: 65px;
   width: 100%;
@@ -349,6 +421,27 @@ const deleteConsultOrder = (item?: ConsultOrderItem) => {
   .van-count-down {
     display: inline;
     color: #f2994a;
+  }
+}
+.pay-type {
+  .amount {
+    padding: 20px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  .btn {
+    padding: 15px;
+  }
+  .van-cell {
+    align-items: center;
+    .cp-icon {
+      margin-right: 10px;
+      font-size: 18px;
+    }
+    .van-checkbox :deep(.van-checkbox__icon) {
+      font-size: 16px;
+    }
   }
 }
 </style>

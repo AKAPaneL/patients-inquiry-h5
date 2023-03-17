@@ -26,6 +26,7 @@ const form = ref<ConsultIllness>({
 })
 
 const fileList = ref<any[]>([])
+// 本地文件读取完毕之后的回调
 const onAfterRead = (item: UploaderFileListItem) => {
   if (!item.file) return
   item.status = 'uploading'
